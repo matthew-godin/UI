@@ -1,5 +1,7 @@
 // Author: Matthew Godin
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -327,6 +329,40 @@ public class rename {
                                                     file
                                             )
                                     );
+                                } else if (!oldFileObject.canWrite()
+                                        || !oldFileObject.canRead()) {
+                                    System.out.print(
+                                            getBaseNoPermissionForFileMessage(
+                                                    file
+                                            )
+                                    );
+                                    // Only for Windows permission check support
+                                } else if (System.getProperty("os.name")
+                                        .toLowerCase().indexOf("win") >= 0) {
+                                    BufferedReader r =
+                                            new BufferedReader(
+                                                    new InputStreamReader(
+                                                            Runtime
+                                                                    .getRuntime()
+                                                                    .exec(
+                                            "icacls " + file)
+                                            .getInputStream()));
+                                    String s = null, totalString = "";
+                                    while ((s = r.readLine()) != null) {
+                                        totalString += s + "\n";
+                                    }
+                                    if (totalString.indexOf("(N)") >= 0) {
+                                        System.out.print(
+                                                getBaseNoPermissionForFileMessage(
+                                                        file
+                                                ));
+                                    } else if (newFileObject.exists()) {
+                                        System.out.print(
+                                                getBaseFileAlreadyExistsMessage(
+                                                        newFileName
+                                                )
+                                        );
+                                    }
                                 } else if (newFileObject.exists()) {
                                     System.out.print(
                                             getBaseFileAlreadyExistsMessage(
@@ -368,6 +404,11 @@ public class rename {
 
     static String getBaseFileAlreadyExistsMessage(String file) {
         return "The file \'" + file + "\' already exists\n";
+    }
+
+    static String getBaseNoPermissionForFileMessage(String file) {
+        return "You do not have appropriate " +
+                "file permissions to rename \'" + file + "\'\n";
     }
 
     static String getBaseFileNotFoundMessage(String file) {
