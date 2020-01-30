@@ -9,16 +9,46 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+class RenamedFile {
+    private String name;
+    private boolean error;
+    private String errorMessage;
+
+    public RenamedFile(String name) {
+        this.name = name;
+        this.error = false;
+        this.errorMessage = "";
+    }
+
+    public RenamedFile(String name, boolean error, String errorMessage) {
+        this.name = name;
+        this.error = error;
+        this.errorMessage = errorMessage;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean hasError() {
+        return error;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+}
+
 interface RenameOperation {
-    String getNewFileName(String file);
+    RenamedFile getNewFileName(String file);
 }
 
 class PrefixRenameOperation implements RenameOperation {
-    String prefix;
+    private String prefix;
 
     @Override
-    public String getNewFileName(String file) {
-        return prefix + file;
+    public RenamedFile getNewFileName(String file) {
+        return new RenamedFile(prefix + file);
     }
 
     public PrefixRenameOperation(String prefix) {
@@ -27,11 +57,11 @@ class PrefixRenameOperation implements RenameOperation {
 }
 
 class SuffixRenameOperation implements RenameOperation {
-    String suffix;
+    private String suffix;
 
     @Override
-    public String getNewFileName(String file) {
-        return file + suffix;
+    public RenamedFile getNewFileName(String file) {
+        return new RenamedFile(file + suffix);
     }
 
     public SuffixRenameOperation(String suffix) {
@@ -40,11 +70,18 @@ class SuffixRenameOperation implements RenameOperation {
 }
 
 class ReplaceRenameOperation implements RenameOperation {
-    String replaced, replacement;
+    private String replaced, replacement;
 
     @Override
-    public String getNewFileName(String file) {
-        return file.replace(replaced, replacement);
+    public RenamedFile getNewFileName(String file) {
+        if (file.indexOf(replaced) < 0) {
+            return new RenamedFile(file, true,
+                    "No instance of \'" + replaced + "\'" +
+                            " was found in " +
+                            "\'" + file + "\'\n\n");
+        } else {
+            return new RenamedFile(file.replace(replaced, replacement));
+        }
     }
 
     public ReplaceRenameOperation(String replaced, String replacement) {
@@ -135,10 +172,11 @@ public class rename {
         }
         else {
             if (!args[argumentListIndex].startsWith(OPTION_PREFIX)) {
-                System.out.print(getBaseInvalidMessage(
-                        args[argumentListIndex],
-                        OPTION, VALID_OPTIONS));
+                System.out.print(getBaseArgumentBeforeOptionMessage(
+                        args[argumentListIndex]
+                ));
                 doRenameFiles = DONT_RENAME_FILES;
+                doneProcessingArguments = DONE_PROCESSING_ARGUMENTS;
             }
             while (!doneProcessingArguments) {
                 if (args[argumentListIndex].equals(HELP_OPTION)) {
@@ -315,70 +353,61 @@ public class rename {
                         try {
                             String newFileName = file;
                             for (RenameOperation operation : operations) {
-                                newFileName = operation.getNewFileName(
+                                RenamedFile renamedFile
+                                        = operation.getNewFileName(
                                         newFileName);
+                                if (renamedFile.hasError()) {
+                                    System.out.print(
+                                            renamedFile.getErrorMessage()
+                                    );
+                                    doRenameFiles = DONT_RENAME_FILES;
+                                    break;
+                                } else {
+                                    newFileName = renamedFile.getName();
+                                }
+                            }
+                            if (!doRenameFiles) {
+                                break;
                             }
                             File oldFileObject = new File(file),
                                     newFileObject = new File(newFileName);
-                            System.out.print(getBaseRenamingMessage(file,
-                                    newFileName));
-                            if (!oldFileObject.renameTo(newFileObject)) {
-                                if (!oldFileObject.exists()) {
-                                    System.out.print(
-                                            getBaseFileNotFoundMessage(
-                                                    file
-                                            )
-                                    );
-                                } else if (!oldFileObject.canWrite()
-                                        || !oldFileObject.canRead()) {
-                                    System.out.print(
-                                            getBaseNoPermissionForFileMessage(
-                                                    file
-                                            )
-                                    );
-                                    // Only for Windows permission check support
-                                } else if (System.getProperty("os.name")
-                                        .toLowerCase().indexOf("win") >= 0) {
-                                    BufferedReader r =
-                                            new BufferedReader(
-                                                    new InputStreamReader(
-                                                            Runtime
-                                                                    .getRuntime()
-                                                                    .exec(
-                                            "icacls " + file)
-                                            .getInputStream()));
-                                    String s = null, totalString = "";
-                                    while ((s = r.readLine()) != null) {
-                                        totalString += s + "\n";
-                                    }
-                                    if (totalString.indexOf("(N)") >= 0) {
-                                        System.out.print(
-                                                getBaseNoPermissionForFileMessage(
-                                                        file
-                                                ));
-                                    } else if (newFileObject.exists()) {
-                                        System.out.print(
-                                                getBaseFileAlreadyExistsMessage(
-                                                        newFileName
-                                                )
-                                        );
-                                    }
-                                } else if (newFileObject.exists()) {
-                                    System.out.print(
-                                            getBaseFileAlreadyExistsMessage(
-                                                    newFileName
-                                            )
-                                    );
-                                }
+                            if (!oldFileObject.exists()) {
                                 System.out.print(
-                                        getBaseUnsuccessfulFileRenameMessage(
-                                                file, newFileName
-                                        ));
+                                        getBaseFileNotFoundMessage(
+                                                file
+                                        )
+                                );
+                            } else if (!oldFileObject.canWrite()
+                                    || !oldFileObject.canRead()
+                                    || System.getProperty("os.name")
+                                    .toLowerCase().indexOf("win") >= 0
+                                    && !hasRenamePermissionsWindows(file)) {
+                                System.out.print(
+                                        getBaseNoPermissionForFileMessage(
+                                                file
+                                        )
+                                );
+                            } else if (!newFileName.equals(file)
+                                    && newFileObject.exists()) {
+                                System.out.print(
+                                        getBaseFileAlreadyExistsMessage(
+                                                newFileName
+                                        )
+                                );
                             } else {
-                                System.out.print(
-                                        getBaseSuccessfulFileRenameMessage(
-                                                file, newFileName
-                                        ));
+                                System.out.print(getBaseRenamingMessage(file,
+                                        newFileName));
+                                if (!oldFileObject.renameTo(newFileObject)) {
+                                    System.out.print(
+                                            getBaseUnsuccessfulFileRenameMessage(
+                                                    file, newFileName
+                                            ));
+                                } else {
+                                    System.out.print(
+                                            getBaseSuccessfulFileRenameMessage(
+                                                    file, newFileName
+                                            ));
+                                }
                             }
                         } catch (Exception exception) {
                             System.out.print(
@@ -392,6 +421,33 @@ public class rename {
         }
     }
 
+    static boolean hasRenamePermissionsWindows(String file) {
+        try {
+            BufferedReader r =
+                    new BufferedReader(
+                            new InputStreamReader(
+                                    Runtime
+                                            .getRuntime()
+                                            .exec(
+                                                    "icacls " + file)
+                                            .getInputStream()));
+            String s = null, totalString = "";
+            while ((s = r.readLine()) != null) {
+                totalString += s + "\n";
+            }
+            return !(totalString.indexOf("(N)") >= 0);
+        } catch (Exception e) {
+            System.out.print("An error occurred while checking" +
+                    "Windows permissions of \'" + file + "\'");
+        }
+        return false;
+    }
+
+    static String getBaseArgumentBeforeOptionMessage(String argument) {
+        return "You can't pass argument \'" + argument + "\' before" +
+                " passing an option\n";
+    }
+
     static String getCurrentTime() {
         return (new SimpleDateFormat("hh-mm-ss"))
                 .format(new Date());
@@ -403,20 +459,20 @@ public class rename {
     }
 
     static String getBaseFileAlreadyExistsMessage(String file) {
-        return "The file \'" + file + "\' already exists\n";
+        return "The file \'" + file + "\' already exists\n\n";
     }
 
     static String getBaseNoPermissionForFileMessage(String file) {
         return "You do not have appropriate " +
-                "file permissions to rename \'" + file + "\'\n";
+                "file permissions to rename \'" + file + "\'\n\n";
     }
 
     static String getBaseFileNotFoundMessage(String file) {
-        return "The file \'" + file + "\' was not found\n";
+        return "The file \'" + file + "\' was not found\n\n";
     }
 
     static String getBaseRenamingMessage(String oldFile, String newFile) {
-        return "renaming " + oldFile + " to " + newFile + "\n";
+        return "Renaming " + oldFile + " to " + newFile + "\n";
     }
 
     static String getBaseSuccessfulFileRenameMessage(String oldFile,
