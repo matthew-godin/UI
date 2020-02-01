@@ -108,6 +108,7 @@ public class rename {
     static final boolean DONT_RENAME_FILES = false;
     static final int NO_FILE = 0;
     static final int NO_OPERATION = 0;
+    static final String CUR_DIR = ".";
 
     static final String HELP = "help";
     static final String HELP_OPTION = OPTION_PREFIX + HELP;
@@ -370,15 +371,15 @@ public class rename {
                                 break;
                             }
                             File oldFileObject = new File(file),
-                                    newFileObject = new File(newFileName);
+                                    newFileObject = new File(newFileName),
+                                    curDirObject = new File(CUR_DIR);
                             if (!oldFileObject.exists()) {
                                 System.out.print(
                                         getBaseFileNotFoundMessage(
                                                 file
                                         )
                                 );
-                            } else if (!oldFileObject.canWrite()
-                                    || !oldFileObject.canRead()
+                            } else if (!curDirObject.canWrite()
                                     || System.getProperty("os.name")
                                     .toLowerCase().indexOf("win") >= 0
                                     && !hasRenamePermissionsWindows(file)) {
