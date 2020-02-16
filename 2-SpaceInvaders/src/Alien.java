@@ -2,6 +2,7 @@ import javafx.scene.Group;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.media.AudioClip;
+import javafx.scene.text.Text;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -92,7 +93,8 @@ public class Alien {
     }
 
     public int move(double startX, double startY,
-                        double endX, double endY, Group root, AudioClip clip) {
+                        double endX, double endY,
+                    Group root, AudioClip clip, Text scoreText) {
         x += movement * speed;
         imageView.setX(x);
         for (ImageView missileImageView : missiles) {
@@ -116,7 +118,7 @@ public class Alien {
         if (isAlive() && x + getWidthSpacing() + getImageWidth() >= startX
             && x + getWidthSpacing() <= endX && y + getHeightSpacing()
         + getImageHeight() >= startY) {
-            kill(root, clip);
+            kill(root, clip, scoreText);
             return 3; // alien collided with ship
         }
         return 4; // nothing happened
@@ -133,12 +135,28 @@ public class Alien {
         root.getChildren().add(missileImageView);
     }
 
-    public void kill(Group root, AudioClip clip) {
+    public void kill(Group root, AudioClip clip, Text scoreText) {
         clip.play();
         alive = false;
         imageView.setVisible(false);
         root.getChildren().remove(this);
         --numAliensAlive;
+        int factor = 0;
+        switch (alienType) {
+            case GREEN:
+                factor = 3;
+                break;
+            case BLUE:
+                factor = 2;
+                break;
+            case PINK:
+                factor = 1;
+                break;
+        }
+        SpaceInvaders.currentScore += 10 * factor;
+        scoreText.setText(SpaceInvaders.SCORE_STRING + Integer.toString(
+                SpaceInvaders.currentScore
+        ));
         speed += 0.02 * SpaceInvaders.currentLevel;
     }
 

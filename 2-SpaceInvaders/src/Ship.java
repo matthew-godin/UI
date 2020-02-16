@@ -2,6 +2,7 @@ import javafx.scene.Group;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.media.AudioClip;
+import javafx.scene.text.Text;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -95,7 +96,7 @@ public class Ship {
         }
     }
 
-    public int move(Group root, Alien[] aliens, AudioClip clip) {
+    public int move(Group root, Alien[] aliens, AudioClip clip, Text scoreText) {
         for (int j = 0; j < missiles.size(); ++j) {
             ImageView missileImageView = missiles.get(j);
             missileImageView.setY(missileImageView.getY() - Alien.MISSILE_SPEED);
@@ -120,7 +121,7 @@ public class Ship {
                             + getMissileHeightSpacing() <= endY) {
                         missiles.remove(missileImageView);
                         root.getChildren().remove(missileImageView);
-                        aliens[i].kill(root, clip);
+                        aliens[i].kill(root, clip, scoreText);
                         return 2; // missile collided with alien
                     }
                 }

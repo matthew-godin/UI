@@ -172,15 +172,14 @@ public class SpaceInvaders extends Application {
                     || event.getCode() == KeyCode.SOFTKEY_1) {
             currentLevel = LEVEL_1;
             level(stage);
-        } else if (event.getCode() == KeyCode.DIGIT1
-                || event.getCode() == KeyCode.NUMPAD1
-                || event.getCode() == KeyCode.SOFTKEY_1) {
+        } else if (event.getCode() == KeyCode.DIGIT2
+                || event.getCode() == KeyCode.NUMPAD2
+                || event.getCode() == KeyCode.SOFTKEY_2) {
             currentLevel = LEVEL_2;
             level(stage);
-        } else if (event.getCode() == KeyCode.DIGIT1
-                || event.getCode() == KeyCode.NUMPAD1
-                || event.getCode() == KeyCode.SOFTKEY_1
-                || event.getCode() == KeyCode.A) {
+        } else if (event.getCode() == KeyCode.DIGIT3
+                || event.getCode() == KeyCode.NUMPAD3
+                || event.getCode() == KeyCode.SOFTKEY_3) {
             currentLevel = LEVEL_3;
             level(stage);
         } else if (event.getCode() == KeyCode.Q) {
@@ -312,7 +311,7 @@ public class SpaceInvaders extends Application {
 
     void handle_animation(Group root, Text scoreText, Text livesText,
                           Stage stage) {
-        ship.move(root, aliens, clip);
+        ship.move(root, aliens, clip, scoreText);
         if (aliens[FIRST_ALIEN].getX()
                 + aliens[FIRST_ALIEN].getWidthSpacing() <= 0
                 || aliens[FIRST_ALIEN].getX()
@@ -327,7 +326,8 @@ public class SpaceInvaders extends Application {
                             ship.getX() + ship.getWidthSpacing()
                                     + ship.getImageWidth(),
                             ship.getY() + ship.getHeightSpacing()
-                                    + ship.getImageHeight(), root, clip);
+                                    + ship.getImageHeight(), root, clip,
+                            scoreText);
                     switch (a) {
                         case 1:
                             break;
@@ -380,7 +380,8 @@ public class SpaceInvaders extends Application {
                             ship.getX() + ship.getWidthSpacing()
                                     + ship.getImageWidth(),
                             ship.getY() + ship.getHeightSpacing()
-                                    + ship.getImageHeight(), root, clip);
+                                    + ship.getImageHeight(), root, clip,
+                            scoreText);
                     switch (a) {
                         case 1:
                             break;
@@ -399,7 +400,7 @@ public class SpaceInvaders extends Application {
                         case 3:
                             root.getChildren()
                                     .remove(aliens[i]);
-                            aliens[i].kill(root, clip);
+                            aliens[i].kill(root, clip, scoreText);
                             --currentLives;
                             if (currentLives == 0) {
                                 timer.stop();
@@ -440,14 +441,23 @@ public class SpaceInvaders extends Application {
         if (shootTimer < 30) {
             shootTimer += 1;
         }
-        if (musicTimer >= (int)(MUSIC_SPEED / Alien.speed * 4)) {
+        int musicSpeed = (int)(MUSIC_SPEED / Alien.speed);
+        if (musicSpeed < 10) {
+            musicSpeed = 10;
+        }
+        /*double newRate = 3.0 * Alien.speed;
+        clip1.setRate(newRate);
+        clip2.setRate(newRate);
+        clip3.setRate(newRate);
+        clip4.setRate(newRate);*/
+        if (musicTimer >= musicSpeed * 4) {
             clip4.play();
             musicTimer = 0;
-        } else if (musicTimer == (int)(MUSIC_SPEED / Alien.speed * 3)) {
+        } else if (musicTimer == musicSpeed * 3) {
             clip3.play();
-        } else if (musicTimer == (int)(MUSIC_SPEED / Alien.speed * 2)) {
+        } else if (musicTimer == musicSpeed * 2) {
             clip2.play();
-        } else if (musicTimer == (int)(MUSIC_SPEED / Alien.speed)) {
+        } else if (musicTimer == musicSpeed) {
             clip1.play();
         }
         ++musicTimer;
