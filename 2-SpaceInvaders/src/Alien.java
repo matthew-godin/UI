@@ -97,6 +97,11 @@ public class Alien {
                     Group root, AudioClip clip, Text scoreText) {
         x += movement * speed;
         imageView.setX(x);
+        if (isAlive() && (x + getWidthSpacing() + getImageWidth()
+                >= SpaceInvaders.WINDOW_WIDTH || x - getWidthSpacing()
+        <= 0)) {
+            SpaceInvaders.mustInvert = true;
+        }
         for (ImageView missileImageView : missiles) {
             missileImageView.setY(missileImageView.getY() + MISSILE_SPEED);
             if (missileImageView.getY() > SpaceInvaders.WINDOW_HEIGHT) {

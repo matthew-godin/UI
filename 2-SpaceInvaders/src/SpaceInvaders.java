@@ -191,6 +191,7 @@ public class SpaceInvaders extends Application {
     static final double MUSIC_SPEED = 20;
     static final double ALIEN_START_SPEED = 0.3;
     void level(Stage stage) {
+        mustInvert = false;
         Alien.speed = ALIEN_START_SPEED * currentLevel * 2;
         Alien.numAliensAlive = NUM_ALIENS;
         shootTimer = 30;
@@ -308,16 +309,12 @@ public class SpaceInvaders extends Application {
             SpacePressed = false;
         }
     }
-
+    static boolean mustInvert;
     void handle_animation(Group root, Text scoreText, Text livesText,
                           Stage stage) {
         ship.move(root, aliens, clip, scoreText);
-        if (aliens[FIRST_ALIEN].getX()
-                + aliens[FIRST_ALIEN].getWidthSpacing() <= 0
-                || aliens[FIRST_ALIEN].getX()
-                + aliens[FIRST_ALIEN].getWidthSpacing()
-                + aliens[FIRST_ALIEN].getImageWidth() * ALIEN_COLUMNS
-                >= WINDOW_WIDTH) {
+        if (mustInvert) {
+            mustInvert = false;
             for (int i = 0; i < NUM_ALIENS; ++i) {
                 if (/*aliens[i].isAlive()*/true) {
                     aliens[i].invert();
