@@ -115,10 +115,8 @@ public class Alien {
                 return 2; // missile collided with ship
             }
         }
-        if (isAlive() && x + getWidthSpacing() + getImageWidth() >= startX
-            && x + getWidthSpacing() <= endX && y + getHeightSpacing()
+        if (isAlive() && y + getHeightSpacing()
         + getImageHeight() >= startY) {
-            kill(root, clip, scoreText);
             return 3; // alien collided with ship
         }
         return 4; // nothing happened
@@ -157,7 +155,7 @@ public class Alien {
         scoreText.setText(SpaceInvaders.SCORE_STRING + Integer.toString(
                 SpaceInvaders.currentScore
         ));
-        speed += 0.02 * SpaceInvaders.currentLevel;
+        speed += 0.02 * 1;//SpaceInvaders.currentLevel;
     }
 
     public boolean isAlive() {

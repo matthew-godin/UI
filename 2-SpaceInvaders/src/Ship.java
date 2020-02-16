@@ -96,6 +96,10 @@ public class Ship {
         }
     }
 
+    public void playExplosion() {
+        explosionClip.play();
+    }
+
     public int move(Group root, Alien[] aliens, AudioClip clip, Text scoreText) {
         for (int j = 0; j < missiles.size(); ++j) {
             ImageView missileImageView = missiles.get(j);

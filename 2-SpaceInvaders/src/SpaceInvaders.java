@@ -191,7 +191,7 @@ public class SpaceInvaders extends Application {
     static final double MUSIC_SPEED = 20;
     static final double ALIEN_START_SPEED = 0.3;
     void level(Stage stage) {
-        Alien.speed = ALIEN_START_SPEED * currentLevel;
+        Alien.speed = ALIEN_START_SPEED * currentLevel * 2;
         Alien.numAliensAlive = NUM_ALIENS;
         shootTimer = 30;
         musicTimer = 0;
@@ -345,17 +345,9 @@ public class SpaceInvaders extends Application {
                             }
                             break;
                         case 3:
-                            ship.shot();
-                            --currentLives;
-                            if (currentLives == 0) {
-                                timer.stop();
-                                gameOver(stage);
-                            } else {
-                                ship.shot();
-                                livesText.setText(LIVES_STRING + Integer.toString(
-                                        currentLives
-                                ));
-                            }
+                            ship.playExplosion();
+                            timer.stop();
+                            gameOver(stage);
                             break;
                         case 4:
                             break;
@@ -398,20 +390,9 @@ public class SpaceInvaders extends Application {
                             }
                             break;
                         case 3:
-                            root.getChildren()
-                                    .remove(aliens[i]);
-                            aliens[i].kill(root, clip, scoreText);
-                            --currentLives;
-                            if (currentLives == 0) {
-                                timer.stop();
-                                gameOver(stage);
-                            } else {
-                                ship.shot();
-                                livesText.setText(LIVES_STRING + Integer.toString(
-                                        currentLives
-                                ));
-                            }
-
+                            ship.playExplosion();
+                            timer.stop();
+                            gameOver(stage);
                             break;
                         case 4:
                             break;
@@ -442,8 +423,8 @@ public class SpaceInvaders extends Application {
             shootTimer += 1;
         }
         int musicSpeed = (int)(MUSIC_SPEED / Alien.speed);
-        if (musicSpeed < 10) {
-            musicSpeed = 10;
+        if (musicSpeed < 20) {
+            musicSpeed = 20;
         }
         /*double newRate = 3.0 * Alien.speed;
         clip1.setRate(newRate);
