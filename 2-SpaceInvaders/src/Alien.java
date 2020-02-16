@@ -98,7 +98,7 @@ public class Alien {
         x += movement * speed;
         imageView.setX(x);
         if (isAlive() && (x + getWidthSpacing() + getImageWidth()
-                >= SpaceInvaders.WINDOW_WIDTH || x - getWidthSpacing()
+                >= SpaceInvaders.WINDOW_WIDTH || x + getWidthSpacing()
         <= 0)) {
             SpaceInvaders.mustInvert = true;
         }

@@ -219,7 +219,7 @@ public class SpaceInvaders extends Application {
                 - levelText.getLayoutBounds().getWidth());
         levelText.setY(GAME_TEXT_SPACING);
         Text livesText = new Text(LIVES_STRING + Integer.toString(
-                currentLives
+                currentLives - 1
         ));
         livesText.setFill(Color.WHITE);
         livesText.setFont(Font.loadFont(getClass().getResourceAsStream(
@@ -337,7 +337,7 @@ public class SpaceInvaders extends Application {
                             } else {
                                 ship.shot();
                                 livesText.setText(LIVES_STRING + Integer.toString(
-                                        currentLives
+                                        currentLives - 1
                                 ));
                             }
                             break;
@@ -382,7 +382,7 @@ public class SpaceInvaders extends Application {
                             } else {
                                 ship.shot();
                                 livesText.setText(LIVES_STRING + Integer.toString(
-                                        currentLives
+                                        currentLives - 1
                                 ));
                             }
                             break;
