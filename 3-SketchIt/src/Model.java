@@ -105,7 +105,7 @@ class ModelLine implements IModelShape {
     @Override
     public ModelColor getShadeLineColor() {
         if (selected) {
-            return new ModelColor(lineColor.getRed() - TabModel.SELECTED_SHADE, lineColor.getGreen() - TabModel.SELECTED_SHADE, lineColor.getBlue() - TabModel.SELECTED_SHADE);
+            return new ModelColor(lineColor.getRed() - 5 * TabModel.SELECTED_SHADE, lineColor.getGreen() - 5 * TabModel.SELECTED_SHADE, lineColor.getBlue() - 5 * TabModel.SELECTED_SHADE);
         } else {
             return lineColor;
         }
