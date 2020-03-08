@@ -588,7 +588,7 @@ class TabModel {
                 saved = false;
             } else if (currentTool == CurrentTool.SELECT) {
                 shapes.add(shapeOnHold);
-                shapeOnHold = null;
+                //shapeOnHold = null;
                 saved = false;
             }
         }
