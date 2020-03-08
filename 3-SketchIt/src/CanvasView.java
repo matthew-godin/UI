@@ -17,7 +17,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 class CanvasView extends Group implements IView {
-    private Model model;
+    private TabModel model;
     private Canvas canvas;
     class vmShape {
         private Shape shape;
@@ -39,7 +39,7 @@ class CanvasView extends Group implements IView {
     private ArrayList<vmShape> shapes;
     boolean draggingShape;
 
-    CanvasView(Model model) {
+    CanvasView(TabModel model) {
         draggingShape = false;
         widthFactor = 1;
         heightFactor = 1;
@@ -138,9 +138,9 @@ class CanvasView extends Group implements IView {
         line.setStartY(startY);
         line.setEndX(endX);
         line.setEndY(endY);
-        line.setStroke(Color.color(modelLine.getLineColor().getRed(),
-                modelLine.getLineColor().getGreen(),
-                modelLine.getLineColor().getBlue()));
+        line.setStroke(Color.color(modelLine.getShadeLineColor().getRed(),
+                modelLine.getShadeLineColor().getGreen(),
+                modelLine.getShadeLineColor().getBlue()));
         if (modelLine.getThickness() == CurrentThickness.SMALL) {
             line.setStrokeWidth(SMALL_SIZE);
         } else if (modelLine.getThickness() == CurrentThickness.MEDIUM) {
@@ -154,13 +154,59 @@ class CanvasView extends Group implements IView {
             line.getStrokeDashArray().addAll(DASHED_DASH, DASHED_GAP);
         }
         line.setOnMousePressed(mouseEvent -> {
-            System.out.println("LLL");
+            double thicknessOffset = MEDIUM_SIZE;
+            if (model.getCurrentThickness() == CurrentThickness.SMALL) {
+                thicknessOffset = SMALL_SIZE;
+            } else if (model.getCurrentThickness() == CurrentThickness.LARGE) {
+                thicknessOffset = LARGE_SIZE;
+            }
+            double realX = mouseEvent.getX();//model.getShapeOnHold().getStartPosition().getX();
+            double realY = mouseEvent.getY();//model.getShapeOnHold().getStartPosition().getY();
+            model.holdMouse(realX < thicknessOffset ? thicknessOffset
+                            : (realX > canvas.getWidth() - thicknessOffset ? (canvas.getWidth() - thicknessOffset) / widthFactor : realX / widthFactor),
+                    realY < thicknessOffset ? thicknessOffset
+                            : (realY > canvas.getHeight() - thicknessOffset ? (canvas.getHeight() - thicknessOffset) / heightFactor : realY / heightFactor),
+                    modelLine);
         });
         line.setOnMouseReleased(mouseEvent -> {
-
+            double thicknessOffset = MEDIUM_SIZE;
+            if (model.getCurrentThickness() == CurrentThickness.SMALL) {
+                thicknessOffset = SMALL_SIZE;
+            } else if (model.getCurrentThickness() == CurrentThickness.LARGE) {
+                thicknessOffset = LARGE_SIZE;
+            }
+            double realX = mouseEvent.getX();//model.getShapeOnHold().getStartPosition().getX();
+            double realY = mouseEvent.getY();//model.getShapeOnHold().getStartPosition().getY();
+            model.releaseMouse(realX < thicknessOffset ? thicknessOffset
+                            : (realX > canvas.getWidth() - thicknessOffset ? (canvas.getWidth() - thicknessOffset) / widthFactor : realX / widthFactor),
+                    realY < thicknessOffset ? thicknessOffset
+                            : (realY > canvas.getHeight() - thicknessOffset ? (canvas.getHeight() - thicknessOffset) / heightFactor : realY / heightFactor),
+                    modelLine);
         });
         line.setOnMouseDragged(mouseEvent -> {
-
+            double thicknessOffset = MEDIUM_SIZE;
+            if (model.getCurrentThickness() == CurrentThickness.SMALL) {
+                thicknessOffset = SMALL_SIZE;
+            } else if (model.getCurrentThickness() == CurrentThickness.LARGE) {
+                thicknessOffset = LARGE_SIZE;
+            }
+            double realX = mouseEvent.getX() - ToolbarView.TOOLBAR_WIDTH;
+            double realY = mouseEvent.getY() - ToolbarView.TOP_HEIGHT;
+            if (model.getShapeOnHold() != null && (model.getShapeOnHold().getStartPosition().getX() > thicknessOffset
+                    && model.getShapeOnHold().getStartPosition().getY() > thicknessOffset)) {
+                model.moveMouse(realX < thicknessOffset ? thicknessOffset
+                                : (realX > canvas.getWidth() - thicknessOffset ? (canvas.getWidth() - thicknessOffset) / widthFactor : realX / widthFactor),
+                        realY < thicknessOffset ? thicknessOffset
+                                : (realY > canvas.getHeight() - thicknessOffset ? (canvas.getHeight() - thicknessOffset) / heightFactor : realY / heightFactor),
+                        modelLine);
+            } else if (model.getShapeOnHold() != null) {
+                if (model.getShapeOnHold().getStartPosition().getX() <= thicknessOffset) {
+                    model.getShapeOnHold().setStartX(thicknessOffset + 1);
+                }
+                if (model.getShapeOnHold().getStartPosition().getY() <= thicknessOffset) {
+                    model.getShapeOnHold().setStartY(thicknessOffset + 1);
+                }
+            }
         });
         this.getChildren().add(line);
         shapes.add(new vmShape(line, modelLine));
@@ -184,12 +230,12 @@ class CanvasView extends Group implements IView {
             circle.setCenterY(yDist + startY);
         }
         circle.setRadius(Math.abs(xDist > yDist ? yDist : xDist));
-        circle.setStroke(Color.color(modelCircle.getLineColor().getRed(),
-                modelCircle.getLineColor().getGreen(),
-                modelCircle.getLineColor().getBlue()));
-        circle.setFill(Color.color(modelCircle.getFillColor().getRed(),
-                modelCircle.getFillColor().getGreen(),
-                modelCircle.getFillColor().getBlue()));
+        circle.setStroke(Color.color(modelCircle.getShadeLineColor().getRed(),
+                modelCircle.getShadeLineColor().getGreen(),
+                modelCircle.getShadeLineColor().getBlue()));
+        circle.setFill(Color.color(modelCircle.getShadeFillColor().getRed(),
+                modelCircle.getShadeFillColor().getGreen(),
+                modelCircle.getShadeFillColor().getBlue()));
         if (modelCircle.getThickness() == CurrentThickness.SMALL) {
             circle.setStrokeWidth(SMALL_SIZE);
         } else if (modelCircle.getThickness() == CurrentThickness.MEDIUM) {
@@ -203,13 +249,59 @@ class CanvasView extends Group implements IView {
             circle.getStrokeDashArray().addAll(DASHED_DASH, DASHED_GAP);
         }
         circle.setOnMousePressed(mouseEvent -> {
-            System.out.println("CCC");
+            double thicknessOffset = MEDIUM_SIZE;
+            if (model.getCurrentThickness() == CurrentThickness.SMALL) {
+                thicknessOffset = SMALL_SIZE;
+            } else if (model.getCurrentThickness() == CurrentThickness.LARGE) {
+                thicknessOffset = LARGE_SIZE;
+            }
+            double realX = mouseEvent.getX();//model.getShapeOnHold().getStartPosition().getX();
+            double realY = mouseEvent.getY();//model.getShapeOnHold().getStartPosition().getY();
+            model.holdMouse(realX < thicknessOffset ? thicknessOffset
+                            : (realX > canvas.getWidth() - thicknessOffset ? (canvas.getWidth() - thicknessOffset) / widthFactor : realX / widthFactor),
+                    realY < thicknessOffset ? thicknessOffset
+                            : (realY > canvas.getHeight() - thicknessOffset ? (canvas.getHeight() - thicknessOffset) / heightFactor : realY / heightFactor),
+                    modelCircle);
         });
         circle.setOnMouseReleased(mouseEvent -> {
-
+            double thicknessOffset = MEDIUM_SIZE;
+            if (model.getCurrentThickness() == CurrentThickness.SMALL) {
+                thicknessOffset = SMALL_SIZE;
+            } else if (model.getCurrentThickness() == CurrentThickness.LARGE) {
+                thicknessOffset = LARGE_SIZE;
+            }
+            double realX = mouseEvent.getX();//model.getShapeOnHold().getStartPosition().getX();
+            double realY = mouseEvent.getY();//model.getShapeOnHold().getStartPosition().getY();
+            model.releaseMouse(realX < thicknessOffset ? thicknessOffset
+                            : (realX > canvas.getWidth() - thicknessOffset ? (canvas.getWidth() - thicknessOffset) / widthFactor : realX / widthFactor),
+                    realY < thicknessOffset ? thicknessOffset
+                            : (realY > canvas.getHeight() - thicknessOffset ? (canvas.getHeight() - thicknessOffset) / heightFactor : realY / heightFactor),
+                    modelCircle);
         });
         circle.setOnMouseDragged(mouseEvent -> {
-
+            double thicknessOffset = MEDIUM_SIZE;
+            if (model.getCurrentThickness() == CurrentThickness.SMALL) {
+                thicknessOffset = SMALL_SIZE;
+            } else if (model.getCurrentThickness() == CurrentThickness.LARGE) {
+                thicknessOffset = LARGE_SIZE;
+            }
+            double realX = mouseEvent.getX() - ToolbarView.TOOLBAR_WIDTH;
+            double realY = mouseEvent.getY() - ToolbarView.TOP_HEIGHT;
+            if (model.getShapeOnHold() != null && (model.getShapeOnHold().getStartPosition().getX() > thicknessOffset
+                    && model.getShapeOnHold().getStartPosition().getY() > thicknessOffset)) {
+                model.moveMouse(realX < thicknessOffset ? thicknessOffset
+                                : (realX > canvas.getWidth() - thicknessOffset ? (canvas.getWidth() - thicknessOffset) / widthFactor : realX / widthFactor),
+                        realY < thicknessOffset ? thicknessOffset
+                                : (realY > canvas.getHeight() - thicknessOffset ? (canvas.getHeight() - thicknessOffset) / heightFactor : realY / heightFactor),
+                        modelCircle);
+            } else if (model.getShapeOnHold() != null) {
+                if (model.getShapeOnHold().getStartPosition().getX() <= thicknessOffset) {
+                    model.getShapeOnHold().setStartX(thicknessOffset + 1);
+                }
+                if (model.getShapeOnHold().getStartPosition().getY() <= thicknessOffset) {
+                    model.getShapeOnHold().setStartY(thicknessOffset + 1);
+                }
+            }
         });
         this.getChildren().add(circle);
         shapes.add(new vmShape(circle, modelCircle));
@@ -233,12 +325,12 @@ class CanvasView extends Group implements IView {
         }
         rectangle.setWidth(Math.abs(endX - startX));
         rectangle.setHeight(Math.abs(endY - startY));
-        rectangle.setStroke(Color.color(modelRectangle.getLineColor().getRed(),
-                modelRectangle.getLineColor().getGreen(),
-                modelRectangle.getLineColor().getBlue()));
-        rectangle.setFill(Color.color(modelRectangle.getFillColor().getRed(),
-                modelRectangle.getFillColor().getGreen(),
-                modelRectangle.getFillColor().getBlue()));
+        rectangle.setStroke(Color.color(modelRectangle.getShadeLineColor().getRed(),
+                modelRectangle.getShadeLineColor().getGreen(),
+                modelRectangle.getShadeLineColor().getBlue()));
+        rectangle.setFill(Color.color(modelRectangle.getShadeFillColor().getRed(),
+                modelRectangle.getShadeFillColor().getGreen(),
+                modelRectangle.getShadeFillColor().getBlue()));
         if (modelRectangle.getThickness() == CurrentThickness.SMALL) {
             rectangle.setStrokeWidth(SMALL_SIZE);
         } else if (modelRectangle.getThickness() == CurrentThickness.MEDIUM) {
@@ -252,17 +344,18 @@ class CanvasView extends Group implements IView {
             rectangle.getStrokeDashArray().addAll(DASHED_DASH, DASHED_GAP);
         }
         rectangle.setOnMousePressed(mouseEvent -> {
-            System.out.println("RRR");
             double thicknessOffset = MEDIUM_SIZE;
             if (model.getCurrentThickness() == CurrentThickness.SMALL) {
                 thicknessOffset = SMALL_SIZE;
             } else if (model.getCurrentThickness() == CurrentThickness.LARGE) {
                 thicknessOffset = LARGE_SIZE;
             }
-            model.holdMouse(mouseEvent.getX() < thicknessOffset ? thicknessOffset
-                            : (mouseEvent.getX() > canvas.getWidth() - thicknessOffset ? (canvas.getWidth() - thicknessOffset) / widthFactor : mouseEvent.getX() / widthFactor),
-                    mouseEvent.getY() < thicknessOffset ? thicknessOffset
-                            : (mouseEvent.getY() > canvas.getHeight() - thicknessOffset ? (canvas.getHeight() - thicknessOffset) / heightFactor : mouseEvent.getY() / heightFactor),
+            double realX = mouseEvent.getX();//model.getShapeOnHold().getStartPosition().getX();
+            double realY = mouseEvent.getY();//model.getShapeOnHold().getStartPosition().getY();
+            model.holdMouse(realX < thicknessOffset ? thicknessOffset
+                            : (realX > canvas.getWidth() - thicknessOffset ? (canvas.getWidth() - thicknessOffset) / widthFactor : realX / widthFactor),
+                    realY < thicknessOffset ? thicknessOffset
+                            : (realY > canvas.getHeight() - thicknessOffset ? (canvas.getHeight() - thicknessOffset) / heightFactor : realY / heightFactor),
                     modelRectangle);
         });
         rectangle.setOnMouseReleased(mouseEvent -> {
@@ -272,10 +365,12 @@ class CanvasView extends Group implements IView {
             } else if (model.getCurrentThickness() == CurrentThickness.LARGE) {
                 thicknessOffset = LARGE_SIZE;
             }
-            model.releaseMouse(mouseEvent.getX() < thicknessOffset ? thicknessOffset
-                            : (mouseEvent.getX() > canvas.getWidth() - thicknessOffset ? (canvas.getWidth() - thicknessOffset) / widthFactor : mouseEvent.getX() / widthFactor),
-                    mouseEvent.getY() < thicknessOffset ? thicknessOffset
-                            : (mouseEvent.getY() > canvas.getHeight() - thicknessOffset ? (canvas.getHeight() - thicknessOffset) / heightFactor : mouseEvent.getY() / heightFactor),
+            double realX = mouseEvent.getX();//model.getShapeOnHold().getStartPosition().getX();
+            double realY = mouseEvent.getY();//model.getShapeOnHold().getStartPosition().getY();
+            model.releaseMouse(realX < thicknessOffset ? thicknessOffset
+                            : (realX > canvas.getWidth() - thicknessOffset ? (canvas.getWidth() - thicknessOffset) / widthFactor : realX / widthFactor),
+                    realY < thicknessOffset ? thicknessOffset
+                            : (realY > canvas.getHeight() - thicknessOffset ? (canvas.getHeight() - thicknessOffset) / heightFactor : realY / heightFactor),
                     modelRectangle);
         });
         rectangle.setOnMouseDragged(mouseEvent -> {
@@ -285,11 +380,23 @@ class CanvasView extends Group implements IView {
             } else if (model.getCurrentThickness() == CurrentThickness.LARGE) {
                 thicknessOffset = LARGE_SIZE;
             }
-            model.moveMouse(mouseEvent.getX() < thicknessOffset ? thicknessOffset
-                            : (mouseEvent.getX() > canvas.getWidth() - thicknessOffset ? (canvas.getWidth() - thicknessOffset) / widthFactor : mouseEvent.getX() / widthFactor),
-                    mouseEvent.getY() < thicknessOffset ? thicknessOffset
-                            : (mouseEvent.getY() > canvas.getHeight() - thicknessOffset ? (canvas.getHeight() - thicknessOffset) / heightFactor : mouseEvent.getY() / heightFactor),
-                    modelRectangle);
+            double realX = mouseEvent.getX() - ToolbarView.TOOLBAR_WIDTH;
+            double realY = mouseEvent.getY() - ToolbarView.TOP_HEIGHT;
+            if (model.getShapeOnHold() != null && (model.getShapeOnHold().getStartPosition().getX() > thicknessOffset
+            && model.getShapeOnHold().getStartPosition().getY() > thicknessOffset)) {
+                model.moveMouse(realX < thicknessOffset ? thicknessOffset
+                                : (realX > canvas.getWidth() - thicknessOffset ? (canvas.getWidth() - thicknessOffset) / widthFactor : realX / widthFactor),
+                        realY < thicknessOffset ? thicknessOffset
+                                : (realY > canvas.getHeight() - thicknessOffset ? (canvas.getHeight() - thicknessOffset) / heightFactor : realY / heightFactor),
+                        modelRectangle);
+            } else if (model.getShapeOnHold() != null) {
+                if (model.getShapeOnHold().getStartPosition().getX() <= thicknessOffset) {
+                    model.getShapeOnHold().setStartX(thicknessOffset + 1);
+                }
+                if (model.getShapeOnHold().getStartPosition().getY() <= thicknessOffset) {
+                    model.getShapeOnHold().setStartY(thicknessOffset + 1);
+                }
+            }
         });
         this.getChildren().add(rectangle);
         shapes.add(new vmShape(rectangle, modelRectangle));

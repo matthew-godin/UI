@@ -17,18 +17,9 @@ public class SketchIt extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         Model model = new Model();
-        CanvasView canvasView = new CanvasView(model);
-        ToolbarView toolbarView = new ToolbarView(model, canvasView, stage);
-        canvasView.setCanvasHeight(toolbarView.getMenuBarHeight());
-
+        ToolbarView toolbarView = new ToolbarView(model, stage);
         Scene scene = new Scene(toolbarView, WINDOW_WIDTH, WINDOW_HEIGHT);
         stage.setScene(scene);
-        stage.widthProperty().addListener((obs, oldVal, newVal) -> {
-            canvasView.resizeWidth(stage.getWidth());
-        });
-        stage.heightProperty().addListener((obs, oldVal, newVal) -> {
-            canvasView.resizeHeight(stage.getHeight());
-        });
         stage.setMinWidth(WINDOW_MIN_WIDTH);
         stage.setMinHeight(WINDOW_MIN_HEIGHT);
         stage.setMaxWidth(WINDOW_MAX_WIDTH);

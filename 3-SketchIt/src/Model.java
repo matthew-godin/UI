@@ -43,9 +43,12 @@ class ModelPosition implements Serializable {
     }
 }
 interface IModelShape extends Serializable {
+    void setStartX(double x);
+    void setStartY(double y);
     ModelPosition getStartPosition();
     ModelPosition getEndPosition();
     ModelColor getLineColor();
+    ModelColor getShadeLineColor();
     CurrentThickness getThickness();
     CurrentStyle getStyle();
     void resizeWidth(double factor);
@@ -60,6 +63,7 @@ interface IModelShape extends Serializable {
 }
 interface IModelFillable extends IModelShape {
     ModelColor getFillColor();
+    ModelColor getShadeFillColor();
     void updateFillColor(ModelColor color);
 }
 class ModelLine implements IModelShape {
@@ -68,6 +72,16 @@ class ModelLine implements IModelShape {
     private CurrentThickness thickness;
     private CurrentStyle style;
     private boolean selected;
+
+    @Override
+    public void setStartX(double x) {
+        startPosition = new ModelPosition(x, startPosition.getY());
+    }
+
+    @Override
+    public void setStartY(double y) {
+        startPosition = new ModelPosition(startPosition.getX(), y);
+    }
 
     public ModelLine(ModelPosition startPosition, ModelPosition endPosition, ModelColor lineColor,
                 CurrentThickness thickness, CurrentStyle style) {
@@ -89,12 +103,17 @@ class ModelLine implements IModelShape {
     }
 
     @Override
-    public ModelColor getLineColor() {
+    public ModelColor getShadeLineColor() {
         if (selected) {
-            return new ModelColor(lineColor.getRed() + Model.SELECTED_SHADE, lineColor.getGreen() + Model.SELECTED_SHADE, lineColor.getBlue() + Model.SELECTED_SHADE);
+            return new ModelColor(lineColor.getRed() + TabModel.SELECTED_SHADE, lineColor.getGreen() + TabModel.SELECTED_SHADE, lineColor.getBlue() + TabModel.SELECTED_SHADE);
         } else {
             return lineColor;
         }
+    }
+
+    @Override
+    public ModelColor getLineColor() {
+        return lineColor;
     }
 
     @Override
@@ -162,6 +181,16 @@ class ModelCircle implements IModelFillable {
     private CurrentStyle style;
     private boolean selected;
 
+    @Override
+    public void setStartX(double x) {
+        startPosition = new ModelPosition(x, startPosition.getY());
+    }
+
+    @Override
+    public void setStartY(double y) {
+        startPosition = new ModelPosition(startPosition.getX(), y);
+    }
+
     public ModelCircle(ModelPosition startPosition, ModelPosition endPosition, ModelColor lineColor, ModelColor fillColor,
                   CurrentThickness thickness, CurrentStyle style) {
         this.startPosition = startPosition;
@@ -213,21 +242,31 @@ class ModelCircle implements IModelFillable {
     }
 
     @Override
-    public ModelColor getLineColor() {
+    public ModelColor getShadeLineColor() {
         if (selected) {
-            return new ModelColor(lineColor.getRed() + Model.SELECTED_SHADE, lineColor.getGreen() + Model.SELECTED_SHADE, lineColor.getBlue() + Model.SELECTED_SHADE);
+            return new ModelColor(lineColor.getRed() + TabModel.SELECTED_SHADE, lineColor.getGreen() + TabModel.SELECTED_SHADE, lineColor.getBlue() + TabModel.SELECTED_SHADE);
         } else {
             return lineColor;
         }
     }
 
     @Override
-    public ModelColor getFillColor() {
+    public ModelColor getLineColor() {
+        return lineColor;
+    }
+
+    @Override
+    public ModelColor getShadeFillColor() {
         if (selected) {
-            return new ModelColor(fillColor.getRed() + Model.SELECTED_SHADE, fillColor.getGreen() + Model.SELECTED_SHADE, fillColor.getBlue() + Model.SELECTED_SHADE);
+            return new ModelColor(fillColor.getRed() + TabModel.SELECTED_SHADE, fillColor.getGreen() + TabModel.SELECTED_SHADE, fillColor.getBlue() + TabModel.SELECTED_SHADE);
         } else {
             return fillColor;
         }
+    }
+
+    @Override
+    public ModelColor getFillColor() {
+        return fillColor;
     }
 
     @Override
@@ -269,6 +308,16 @@ class ModelRectangle implements IModelFillable {
     private CurrentThickness thickness;
     private CurrentStyle style;
     private boolean selected;
+
+    @Override
+    public void setStartX(double x) {
+        startPosition = new ModelPosition(x, startPosition.getY());
+    }
+
+    @Override
+    public void setStartY(double y) {
+        startPosition = new ModelPosition(startPosition.getX(), y);
+    }
 
     public ModelRectangle(ModelPosition startPosition, ModelPosition endPosition, ModelColor lineColor, ModelColor fillColor,
                      CurrentThickness thickness, CurrentStyle style) {
@@ -326,21 +375,31 @@ class ModelRectangle implements IModelFillable {
     }
 
     @Override
-    public ModelColor getLineColor() {
+    public ModelColor getShadeLineColor() {
         if (selected) {
-            return new ModelColor(lineColor.getRed() + Model.SELECTED_SHADE, lineColor.getGreen() + Model.SELECTED_SHADE, lineColor.getBlue() + Model.SELECTED_SHADE);
+            return new ModelColor(lineColor.getRed() + TabModel.SELECTED_SHADE, lineColor.getGreen() + TabModel.SELECTED_SHADE, lineColor.getBlue() + TabModel.SELECTED_SHADE);
         } else {
             return lineColor;
         }
     }
 
     @Override
-    public ModelColor getFillColor() {
+    public ModelColor getLineColor() {
+        return lineColor;
+    }
+
+    @Override
+    public ModelColor getShadeFillColor() {
         if (selected) {
-            return new ModelColor(fillColor.getRed() + Model.SELECTED_SHADE, fillColor.getGreen() + Model.SELECTED_SHADE, fillColor.getBlue() + Model.SELECTED_SHADE);
+            return new ModelColor(fillColor.getRed() + TabModel.SELECTED_SHADE, fillColor.getGreen() + TabModel.SELECTED_SHADE, fillColor.getBlue() + TabModel.SELECTED_SHADE);
         } else {
             return fillColor;
         }
+    }
+
+    @Override
+    public ModelColor getFillColor() {
+        return fillColor;
     }
 
     @Override
@@ -373,8 +432,39 @@ class ModelRectangle implements IModelFillable {
 }
 
 public class Model {
+    ArrayList<TabModel> tabs;
+    TabModel fake;
+
+    public Model() {
+        tabs = new ArrayList<TabModel>();
+        fake = new TabModel(-1);
+    }
+
+    public int getNumTabs() {
+        return tabs.size();
+    }
+
+    public void addTab() {
+        tabs.add(new TabModel(tabs.size()));
+    }
+
+    public void removeTab(int index) {
+        tabs.remove(index);
+    }
+
+    public TabModel getTabModel(int index) {
+        if (index >= tabs.size() || index < 0) {
+            return fake;
+        } else {
+            return tabs.get(index);
+        }
+    }
+}
+
+class TabModel {
     static double SELECTED_SHADE = -0.1;
-    static String DEFAULT_FILE_NAME = "Untitled" + ToolbarView.SKETCHIT_EXTENSION;
+    static String DEFAULT_NAME = "Untitled";
+    static String DEFAULT_FILE_NAME = DEFAULT_NAME + ToolbarView.SKETCHIT_EXTENSION;
     private ArrayList<IView> views = new ArrayList<IView>();
     private CurrentTool currentTool;
     private CurrentThickness currentThickness;
@@ -385,8 +475,10 @@ public class Model {
     private ModelPosition startPosition;
     private ArrayList<IModelShape> shapes;
     private IModelShape shapeOnHold;
+    private int index;
 
-    public Model() {
+    public TabModel(int index) {
+        this.index = index;
         nameSet = false;
         saved = true;
         currentTool = CurrentTool.SELECT;
@@ -397,6 +489,9 @@ public class Model {
         onHold = false;
         shapes = new ArrayList<IModelShape>();
         fileName = DEFAULT_FILE_NAME;
+        if (index >= 1) {
+            fileName = DEFAULT_NAME + Integer.toString(index) + ToolbarView.SKETCHIT_EXTENSION;
+        }
     }
 
     public void addView(IView view) {
@@ -406,22 +501,29 @@ public class Model {
 
     ModelPosition startDrag, endDrag;
     public void holdMouse(double x, double y, IModelShape shape) {
-        onHold = true;
-        if (shapeOnHold != null) {
-            shapeOnHold.unSelect();
+        //onHold = true;
+        for (IModelShape s : shapes) {
+            s.unSelect();
         }
+        /*if (shapeOnHold != null) {
+            shapeOnHold.unSelect();
+        }*/
         if (currentTool == CurrentTool.LINE) {
+            onHold = true;
             shapeOnHold = new ModelLine(new ModelPosition(x, y), new ModelPosition(x, y), new ModelColor(lineColor.getRed(),
                     lineColor.getGreen(), lineColor.getBlue()), currentThickness, currentStyle);
         } else if (currentTool == CurrentTool.CIRCLE) {
+            onHold = true;
             shapeOnHold = new ModelCircle(new ModelPosition(x, y), new ModelPosition(x, y), new ModelColor(lineColor.getRed(),
                     lineColor.getGreen(), lineColor.getBlue()), new ModelColor(fillColor.getRed(),
                     fillColor.getGreen(), fillColor.getBlue()), currentThickness, currentStyle);
         } else if (currentTool == CurrentTool.RECTANGLE) {
+            onHold = true;
             shapeOnHold = new ModelRectangle(new ModelPosition(x, y), new ModelPosition(x, y), new ModelColor(lineColor.getRed(),
                     lineColor.getGreen(), lineColor.getBlue()), new ModelColor(fillColor.getRed(),
                     fillColor.getGreen(), fillColor.getBlue()), currentThickness, currentStyle);
         } else if (currentTool == CurrentTool.SELECT && shape != null) {
+            onHold = true;
             shape.select();
             shapeOnHold = shape;
             startDrag = shape.getStartPosition();
@@ -456,7 +558,9 @@ public class Model {
                 shapeOnHold = new ModelRectangle(shapeOnHold.getStartPosition(), new ModelPosition(x, y), shapeOnHold.getLineColor(),
                         ((ModelRectangle)shapeOnHold).getFillColor(), currentThickness, currentStyle);
             } else if (currentTool == CurrentTool.SELECT) {
-                shapeOnHold.updatePosition(new ModelPosition(x - startPosition.getX(), y - startPosition.getY()), startDrag, endDrag);
+                if (shapeOnHold != null) {
+                    shapeOnHold.updatePosition(new ModelPosition(x - startPosition.getX(), y - startPosition.getY()), startDrag, endDrag);
+                }
             }
         }
         notifyObservers();
