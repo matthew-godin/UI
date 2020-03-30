@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/ImageLinearLayout"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+    <!--<ImageView
+            android:id="@+id/imageActivityImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>-->
+    <RatingBar
+            android:id="@+id/rating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:saveEnabled="true"
+            android:numStars="5"
+            android:stepSize="1"
+            android:scaleX=".5"
+            android:scaleY=".5"
+            android:layout_gravity="right"/>
+</LinearLayout>

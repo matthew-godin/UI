@@ -1,6 +1,7 @@
 package com.example.fotag;
 
 import android.app.ActionBar;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.drawable.GradientDrawable;
@@ -16,6 +17,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProviders;
 import org.w3c.dom.Text;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -59,7 +61,24 @@ public class MainActivity extends AppCompatActivity {
                 param.columnSpec = GridLayout.spec(0, 1);
                 param.rowSpec = GridLayout.spec(i, 1);
             }
-            linearLayout.addView(imageView);
+
+            imageView.setOnClickListener(new BitmapOnClickListener(images.get(i))
+            {
+                @Override
+                public void onClick(View v) {
+                    try {
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                        byte[] byteArray = stream.toByteArray();
+                        Intent myIntent = new Intent(getBaseContext(), ImageActivity.class);
+                        myIntent.putExtra("Bitmap", byteArray);
+                        startActivity(myIntent);
+                    } catch (Exception e) {
+                        Log.w("myApp", "PLPLPLPLPLPL" + e.toString());
+                    }
+                }
+            });
+            //linearLayout.addView(imageView);
             RatingBar ratingBar = new RatingBar(this);
             ratingBar.setNumStars(5);
             ratingBar.setStepSize(1);
