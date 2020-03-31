@@ -20,7 +20,6 @@ import java.net.URL;
 public class LoadImageDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        // Use the Builder class for convenient dialog construction
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.LoadImageURLStyle);
@@ -32,8 +31,12 @@ public class LoadImageDialogFragment extends DialogFragment {
                     public void onClick(DialogInterface dialog, int id) {
                         try {
                             Bitmap bmp = new LoadImageTask().doInBackground(((EditText)loadImageDialogView.findViewById(R.id.loadImageURL)).getText().toString());
-                            ((MainActivity)getActivity()).mainViewModel.addImage(bmp);
-                            ((MainActivity)getActivity()).loadImages(((MainActivity)getActivity()).mainViewModel.getImages());
+                            ((MainActivity)getActivity()).model.addImage(bmp,
+                                    ((MainActivity)getActivity()).appWidth,
+                                    ((MainActivity)getActivity()).appHeight);
+                            ((MainActivity)getActivity()).loadImages(((MainActivity)getActivity()).model.getImages(),
+                                    ((MainActivity)getActivity()).model.getNumStars(),
+                                    ((MainActivity)getActivity()).model.getRating());
                         } catch (Exception e) {
                             Log.w("myApp", e.toString());
                         }

@@ -1,123 +1,105 @@
 package com.example.fotag;
-import android.util.Log;
-import java.util.Observable;
-import java.util.Observer;
+import android.graphics.Bitmap;
+import android.util.DisplayMetrics;
 
-class Model extends Observable
+import java.util.ArrayList;
+
+class Model
 {
-    private static Model ourInstance;
+    private static Model instance;
     static Model getInstance()
     {
-        if (ourInstance == null) {
-            ourInstance = new Model();
+        if (instance == null) {
+            instance = new Model();
         }
-        return ourInstance;
+        return instance;
     }
-    private int mCounter;
+    private ArrayList<Bitmap> images;
+    private ArrayList<Bitmap> horizontalImages;
+    private ArrayList<Bitmap> verticalImages;
+    private ArrayList<Integer> stars;
+    private int rating;
     Model() {
-
-        mCounter = 0;
+        images = new ArrayList<Bitmap>();
+        stars = new ArrayList<Integer>();
+        horizontalImages = new ArrayList<Bitmap>();
+        verticalImages = new ArrayList<Bitmap>();
+        rating = 0;
     }
-    public int getCounter()
-    {
-        return mCounter;
+    public int getNumVisibleImages() {
+        int result = 0;
+        for (int i = 0; i < stars.size(); ++i) {
+            if (stars.get(i) >= rating) {
+                ++result;
+            }
+        }
+        return result;
     }
-
-    /**
-     * Set mCounter Value
-     * @param i
-     * -- Value to set Counter
-     */
-    public void setCounter(int i)
-    {
-        Log.d("DEMO", "Model: set counter to " + mCounter);
-        this.mCounter = i;
+    public int getRating() {
+        return rating;
     }
-
-    /**
-     * Increment mCounter by 1
-     */
-    public void incrementCounter()
-    {
-        mCounter++;
-        Log.d("DEMO", "Model: increment counter to " + mCounter);
-
-        // Observable API
-        setChanged();
-        notifyObservers();
+    public void setRating(int rating) {
+        this.rating = rating;
     }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    //
-    // Observable Methods
-    //
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Helper method to make it easier to initialize all observers
-     */
-    public void initObservers()
-    {
-        setChanged();
-        notifyObservers();
+    public ArrayList<Bitmap> getImages() {
+        return images;
     }
-
-    /**
-     * Deletes an observer from the set of observers of this object.
-     * Passing <CODE>null</CODE> to this method will have no effect.
-     *
-     * @param o the observer to be deleted.
-     */
-    @Override
-    public synchronized void deleteObserver(Observer o)
-    {
-        super.deleteObserver(o);
+    public ArrayList<Integer> getNumStars() {
+        return stars;
     }
-
-    /**
-     * Adds an observer to the set of observers for this object, provided
-     * that it is not the same as some observer already in the set.
-     * The order in which notifications will be delivered to multiple
-     * observers is not specified. See the class comment.
-     *
-     * @param o an observer to be added.
-     * @throws NullPointerException if the parameter o is null.
-     */
-    @Override
-    public synchronized void addObserver(Observer o)
-    {
-        super.addObserver(o);
+    public void addImage(Bitmap image, int appWidth, int appHeight) {
+        double maxWidth = appWidth * 0.8, horizontalMaxWidth = appHeight,
+                horizontalMaxHeight = appWidth * 0.8,
+                verticalMaxWidth = appWidth,
+                verticalMaxHeight = appHeight * 0.8;
+        double maxHeight = appHeight * 0.2;
+        double ratio = (double)image.getWidth() / (double)image.getHeight();
+        double width, height, horizontalWidth, horizontalHeight,
+            verticalWidth, verticalHeight;
+        if (ratio > maxWidth / maxHeight) {
+            width = maxWidth;
+            height = maxWidth / ratio;
+        } else {
+            width = maxHeight * ratio;
+            height = maxHeight;
+        }
+        if (ratio > horizontalMaxWidth / horizontalMaxHeight) {
+            horizontalWidth = horizontalMaxWidth;
+            horizontalHeight = horizontalMaxWidth / ratio;
+        } else {
+            horizontalWidth = horizontalMaxHeight * ratio;
+            horizontalHeight = horizontalMaxHeight;
+        }
+        if (ratio > verticalMaxWidth / verticalMaxHeight) {
+            verticalWidth = verticalMaxWidth;
+            verticalHeight = verticalMaxWidth / ratio;
+        } else {
+            verticalWidth = verticalMaxHeight * ratio;
+            verticalHeight = verticalMaxHeight;
+        }
+        images.add(Bitmap.createScaledBitmap(image, (int)width,
+                (int)height, true));
+        horizontalImages.add(Bitmap.createScaledBitmap(image,
+                (int)horizontalWidth, (int)horizontalHeight,true));
+        verticalImages.add(Bitmap.createScaledBitmap(image,
+                (int)verticalWidth, (int)verticalHeight,true));
+        stars.add(0);
     }
-
-    /**
-     * Clears the observer list so that this object no longer has any observers.
-     */
-    @Override
-    public synchronized void deleteObservers()
-    {
-        super.deleteObservers();
+    public void updateImageRating(int i, int rating) {
+        if (i < stars.size()) {
+            stars.set(i, rating);
+        }
     }
-
-    /**
-     * If this object has changed, as indicated by the
-     * <code>hasChanged</code> method, then notify all of its observers
-     * and then call the <code>clearChanged</code> method to
-     * indicate that this object has no longer changed.
-     * <p>
-     * Each observer has its <code>update</code> method called with two
-     * arguments: this observable object and <code>null</code>. In other
-     * words, this method is equivalent to:
-     * <blockquote><tt>
-     * notifyObservers(null)</tt></blockquote>
-     *
-     * @see Observable#clearChanged()
-     * @see Observable#hasChanged()
-     * @see Observer#update(Observable, Object)
-     */
-    @Override
-    public void notifyObservers()
-    {
-        super.notifyObservers();
+    public Bitmap getVerticalImage(int i) {
+        return verticalImages.get(i);
+    }
+    public Bitmap getHorizontalImage(int i) {
+        return horizontalImages.get(i);
+    }
+    public void clearImages() {
+        images.clear();
+        stars.clear();
+        horizontalImages.clear();
+        verticalImages.clear();
     }
 }

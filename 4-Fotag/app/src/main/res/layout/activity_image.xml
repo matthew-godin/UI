@@ -3,19 +3,19 @@
               android:id="@+id/ImageLinearLayout"
               android:orientation="vertical"
               android:layout_width="match_parent"
-              android:layout_height="match_parent">
-    <!--<ImageView
+              android:layout_height="match_parent"
+              android:layout_gravity="center">
+    <ImageView
             android:id="@+id/imageActivityImage"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>-->
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"/>
     <RatingBar
-            android:id="@+id/rating"
+            android:id="@+id/ratingImage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:saveEnabled="true"
             android:numStars="5"
             android:stepSize="1"
-            android:scaleX=".5"
-            android:scaleY=".5"
-            android:layout_gravity="right"/>
+            android:layout_gravity="center"/>
 </LinearLayout>

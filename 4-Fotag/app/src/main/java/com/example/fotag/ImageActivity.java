@@ -21,17 +21,26 @@ import org.w3c.dom.Text;
 import java.util.ArrayList;
 
 public class ImageActivity extends AppCompatActivity {
+    Model model;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image);
-        Bitmap bitmap = (Bitmap)getIntent().getParcelableExtra("Bitmap");
-        ImageView imageView = new ImageView(this);//findViewById(R.id.imageActivityImage);
-        imageView.setImageBitmap(bitmap);
-        LinearLayout layout = (LinearLayout)findViewById(R.id.ImageLinearLayout);
-        TextView textView = new TextView(this);
-        textView.setText("KOKOKOK");
-        layout.addView(textView);
-        //layout.addView(imageView);
+        model = Model.getInstance();
+        int imageIndex = (int)getIntent().getIntExtra("ImageIndex",0);
+        ImageView imageView = findViewById(R.id.imageActivityImage);
+        if (getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_LANDSCAPE) {
+            imageView.setImageBitmap(model.getHorizontalImage(imageIndex));
+        } else {
+            imageView.setImageBitmap(model.getVerticalImage(imageIndex));
+        }
+        ((RatingBar)findViewById(R.id.ratingImage)).setRating(model.getNumStars().get(imageIndex));
+        ((RatingBar)findViewById(R.id.ratingImage)).setOnRatingBarChangeListener(new ImageIndexOnRatingBarChangeListener(imageIndex) {
+            @Override
+            public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
+                model.updateImageRating(imageIndex, (int)rating);
+            }
+        });
     }
 }
