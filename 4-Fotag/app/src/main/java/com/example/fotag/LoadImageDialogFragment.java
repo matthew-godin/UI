@@ -38,7 +38,8 @@ public class LoadImageDialogFragment extends DialogFragment {
                                     ((MainActivity)getActivity()).model.getNumStars(),
                                     ((MainActivity)getActivity()).model.getRating());
                         } catch (Exception e) {
-                            Log.w("myApp", e.toString());
+                            ErrorLoadImageDialogFragment nextDialog = new ErrorLoadImageDialogFragment();
+                            nextDialog.show(getActivity().getSupportFragmentManager(), "ErrorLoadImageDialogFragment");
                         }
                     }
                 })

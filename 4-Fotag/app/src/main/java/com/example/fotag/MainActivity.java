@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
         GridLayout gridLayout = ((GridLayout)findViewById(R.id.MainGridLayout));
         gridLayout.removeAllViews();
         int numImages = model.getNumVisibleImages();
+        Log.w("MyApp", "NUM_IMAGES " + numImages);
         if (getResources().getConfiguration().orientation
                 == Configuration.ORIENTATION_LANDSCAPE) {
             gridLayout.setColumnCount(2);
@@ -65,8 +66,11 @@ public class MainActivity extends AppCompatActivity {
             gridLayout.setColumnCount(1);
             gridLayout.setRowCount(numImages);
         }
+        int actualCount = 0;
         for (int i = 0; i < images.size(); ++i) {
+            Log.w("MyApp", "BEGIN");
             if (stars.get(i) >= rating) {
+                Log.w("MyApp", "INSIDE");
                 LinearLayout linearLayout = new LinearLayout(this);
                 linearLayout.setOrientation(LinearLayout.VERTICAL);
                 ImageView imageView = new ImageView(this);
@@ -78,13 +82,13 @@ public class MainActivity extends AppCompatActivity {
                 param.setGravity(Gravity.CENTER);
                 if (getResources().getConfiguration().orientation
                         == Configuration.ORIENTATION_LANDSCAPE) {
-                    param.columnSpec = GridLayout.spec(i % 2, 1);
-                    param.rowSpec = GridLayout.spec(i / 2, 1);
+                    param.columnSpec = GridLayout.spec(actualCount % 2, 1);
+                    param.rowSpec = GridLayout.spec(actualCount / 2, 1);
                 } else {
                     param.columnSpec = GridLayout.spec(0, 1);
-                    param.rowSpec = GridLayout.spec(i, 1);
+                    param.rowSpec = GridLayout.spec(actualCount, 1);
                 }
-
+                Log.w("MyApp", "ONE");
                 imageView.setOnClickListener(new ImageIndexOnClickListener(i) {
                     @Override
                     public void onClick(View v) {
@@ -93,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
                         startActivity(myIntent);
                     }
                 });
+
                 linearLayout.addView(imageView);
                 RatingBar ratingBar = new RatingBar(this);
                 ratingBar.setNumStars(5);
@@ -100,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
                 ratingBar.setScaleX(0.5f);
                 ratingBar.setScaleY(0.5f);
                 ratingBar.setRating(stars.get(i));
+                Log.w("MyApp", "TWO");
                 ratingBar.setOnRatingBarChangeListener(new ImageIndexOnRatingBarChangeListener(i) {
                     @Override
                     public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
@@ -110,10 +116,15 @@ public class MainActivity extends AppCompatActivity {
                                 model.getRating());
                     }
                 });
+                Log.w("MyApp", "THREE");
                 linearLayout.addView(ratingBar);
+                Log.w("MyApp", "FOUR");
                 linearLayout.setLayoutParams(param);
+                Log.w("MyApp", "FIVE");
                 gridLayout.addView(linearLayout);
+                ++actualCount;
             }
+            Log.w("MyApp", "END");
         }
     }
     @Override
@@ -180,7 +191,13 @@ public class MainActivity extends AppCompatActivity {
         });
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        appHeight = displayMetrics.heightPixels;
-        appWidth = displayMetrics.widthPixels;
+        if (getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_LANDSCAPE) {
+            appHeight = displayMetrics.widthPixels;
+            appWidth = displayMetrics.heightPixels;
+        } else {
+            appHeight = displayMetrics.heightPixels;
+            appWidth = displayMetrics.widthPixels;
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.example.fotag;
 import android.graphics.Bitmap;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -40,6 +41,7 @@ class Model
     }
     public void setRating(int rating) {
         this.rating = rating;
+        Log.w("MyApp", "RRR " + rating);
     }
     public ArrayList<Bitmap> getImages() {
         return images;
@@ -88,6 +90,7 @@ class Model
     public void updateImageRating(int i, int rating) {
         if (i < stars.size()) {
             stars.set(i, rating);
+            Log.w("MyApp", "RATING " + rating);
         }
     }
     public Bitmap getVerticalImage(int i) {
