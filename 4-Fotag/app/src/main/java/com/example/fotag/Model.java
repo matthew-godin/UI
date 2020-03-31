@@ -41,7 +41,6 @@ class Model
     }
     public void setRating(int rating) {
         this.rating = rating;
-        Log.w("MyApp", "RRR " + rating);
     }
     public ArrayList<Bitmap> getImages() {
         return images;
@@ -90,7 +89,6 @@ class Model
     public void updateImageRating(int i, int rating) {
         if (i < stars.size()) {
             stars.set(i, rating);
-            Log.w("MyApp", "RATING " + rating);
         }
     }
     public Bitmap getVerticalImage(int i) {

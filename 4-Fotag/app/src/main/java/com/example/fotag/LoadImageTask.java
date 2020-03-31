@@ -12,8 +12,7 @@ class LoadImageTask extends AsyncTask<String, Void, Bitmap> {
         try {
             return BitmapFactory.decodeStream((new URL(urls[0])).openConnection().getInputStream());
         } catch (Exception e) {
-            Log.w("myApp", "OKOKOKO" + e.toString());
+            return null;
         }
-        return null;
     }
 }

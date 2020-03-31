@@ -31,12 +31,17 @@ public class LoadImageDialogFragment extends DialogFragment {
                     public void onClick(DialogInterface dialog, int id) {
                         try {
                             Bitmap bmp = new LoadImageTask().doInBackground(((EditText)loadImageDialogView.findViewById(R.id.loadImageURL)).getText().toString());
-                            ((MainActivity)getActivity()).model.addImage(bmp,
-                                    ((MainActivity)getActivity()).appWidth,
-                                    ((MainActivity)getActivity()).appHeight);
-                            ((MainActivity)getActivity()).loadImages(((MainActivity)getActivity()).model.getImages(),
-                                    ((MainActivity)getActivity()).model.getNumStars(),
-                                    ((MainActivity)getActivity()).model.getRating());
+                            if (bmp == null) {
+                                ErrorLoadImageDialogFragment nextDialog = new ErrorLoadImageDialogFragment();
+                                nextDialog.show(getActivity().getSupportFragmentManager(), "ErrorLoadImageDialogFragment");
+                            } else {
+                                ((MainActivity) getActivity()).model.addImage(bmp,
+                                        ((MainActivity) getActivity()).appWidth,
+                                        ((MainActivity) getActivity()).appHeight);
+                                ((MainActivity) getActivity()).loadImages(((MainActivity) getActivity()).model.getImages(),
+                                        ((MainActivity) getActivity()).model.getNumStars(),
+                                        ((MainActivity) getActivity()).model.getRating());
+                            }
                         } catch (Exception e) {
                             ErrorLoadImageDialogFragment nextDialog = new ErrorLoadImageDialogFragment();
                             nextDialog.show(getActivity().getSupportFragmentManager(), "ErrorLoadImageDialogFragment");

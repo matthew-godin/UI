@@ -57,7 +57,6 @@ public class MainActivity extends AppCompatActivity {
         GridLayout gridLayout = ((GridLayout)findViewById(R.id.MainGridLayout));
         gridLayout.removeAllViews();
         int numImages = model.getNumVisibleImages();
-        Log.w("MyApp", "NUM_IMAGES " + numImages);
         if (getResources().getConfiguration().orientation
                 == Configuration.ORIENTATION_LANDSCAPE) {
             gridLayout.setColumnCount(2);
@@ -68,9 +67,7 @@ public class MainActivity extends AppCompatActivity {
         }
         int actualCount = 0;
         for (int i = 0; i < images.size(); ++i) {
-            Log.w("MyApp", "BEGIN");
             if (stars.get(i) >= rating) {
-                Log.w("MyApp", "INSIDE");
                 LinearLayout linearLayout = new LinearLayout(this);
                 linearLayout.setOrientation(LinearLayout.VERTICAL);
                 ImageView imageView = new ImageView(this);
@@ -88,7 +85,6 @@ public class MainActivity extends AppCompatActivity {
                     param.columnSpec = GridLayout.spec(0, 1);
                     param.rowSpec = GridLayout.spec(actualCount, 1);
                 }
-                Log.w("MyApp", "ONE");
                 imageView.setOnClickListener(new ImageIndexOnClickListener(i) {
                     @Override
                     public void onClick(View v) {
@@ -105,7 +101,6 @@ public class MainActivity extends AppCompatActivity {
                 ratingBar.setScaleX(0.5f);
                 ratingBar.setScaleY(0.5f);
                 ratingBar.setRating(stars.get(i));
-                Log.w("MyApp", "TWO");
                 ratingBar.setOnRatingBarChangeListener(new ImageIndexOnRatingBarChangeListener(i) {
                     @Override
                     public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
@@ -116,15 +111,11 @@ public class MainActivity extends AppCompatActivity {
                                 model.getRating());
                     }
                 });
-                Log.w("MyApp", "THREE");
                 linearLayout.addView(ratingBar);
-                Log.w("MyApp", "FOUR");
                 linearLayout.setLayoutParams(param);
-                Log.w("MyApp", "FIVE");
                 gridLayout.addView(linearLayout);
                 ++actualCount;
             }
-            Log.w("MyApp", "END");
         }
     }
     @Override
@@ -139,7 +130,6 @@ public class MainActivity extends AppCompatActivity {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         super.onCreate(savedInstanceState);
-        Log.w("myApp", "JIJIIJIJIJIJ");
         setContentView(R.layout.activity_main);
         model = Model.getInstance();
         loadImages(model.getImages(),
@@ -165,7 +155,12 @@ public class MainActivity extends AppCompatActivity {
                 Bitmap bmp;
                 for (int i = 0; i < NUM_MSTRINGS; ++i) {
                     bmp = new LoadImageTask().doInBackground(MSTRINGS[i]);
-                    model.addImage(bmp, appWidth, appHeight);
+                    if (bmp == null) {
+                        ErrorLoadImageDialogFragment nextDialog = new ErrorLoadImageDialogFragment();
+                        nextDialog.show(getSupportFragmentManager(), "ErrorLoadImageDialogFragment");
+                    } else {
+                        model.addImage(bmp, appWidth, appHeight);
+                    }
                 }
                 loadImages(model.getImages(),
                         model.getNumStars(),
