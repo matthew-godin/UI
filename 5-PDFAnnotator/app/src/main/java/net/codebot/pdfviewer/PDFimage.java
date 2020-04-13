@@ -68,7 +68,7 @@ public class PDFimage extends ImageView {
         }
         // draw lines over it
         for (Path path : paths) {
-            canvas.drawPath(path, paint);
+            //canvas.drawPath(path, paint);
         }
         super.onDraw(canvas);
     }

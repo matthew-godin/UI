@@ -8,8 +8,11 @@ import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -40,13 +43,21 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        //getSupportActionBar().setTitle(FILENAME);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        TextView documentTitle = findViewById(R.id.documentTitle);
+        documentTitle.setText(FILENAME);
+        TextView pageNumber = findViewById(R.id.pageNumber);
+        pageNumber.setText("Page " + "1" + "/" + "5");
 
         LinearLayout layout = findViewById(R.id.pdfLayout);
         pageImage = new PDFimage(this);
         layout.addView(pageImage);
         layout.setEnabled(true);
         pageImage.setMinimumWidth(1000);
-        pageImage.setMinimumHeight(2000);
+        pageImage.setMinimumHeight(1850);
 
         // open page 0 of the PDF
         // it will be displayed as an image in the pageImage (above)
