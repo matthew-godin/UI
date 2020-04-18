@@ -4,18 +4,49 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.*;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.widget.ImageView;
 
 import java.util.ArrayList;
 
 @SuppressLint("AppCompatCustomView")
 public class PDFimage extends ImageView {
+    private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+        @Override
+        public boolean onScale(ScaleGestureDetector scaleGestureDetector){
+            scaleFactor *= scaleGestureDetector.getScaleFactor();
+            scaleFactor = Math.max(0.1f, Math.min(scaleFactor, 10.0f));
+            setScaleX(scaleFactor);
+            setScaleY(scaleFactor);
+            return true;
+        }
+    }
+
+    class PanGestureListener extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onScroll(MotionEvent e1,
+                                MotionEvent e2,
+                                float distanceX,
+                                float distanceY) {
+            moveX -= distanceX * 0.5f * scaleFactor;
+            moveY -= distanceY * 0.5f * scaleFactor;
+            setTranslationX(moveX);
+            setTranslationY(moveY);
+            return true;
+        }
+    }
 
     final String LOGNAME = "pdf_image";
     final float DRAW_WIDTH = 3, HIGHLIGHT_WIDTH = 30;
     final int HIGHLIGHT_ALPHA = 100;
     enum TouchState { STILL, MOVING };
+    private ScaleGestureDetector scaleGestureDetector;
+    private GestureDetector gestureDetector;
+    private float moveX = 0, moveY = 0;
+    private boolean panHold = false;
+    private float scaleFactor = 1.0f;
 
     // drawing path
     Path path = null;
@@ -37,6 +68,8 @@ public class PDFimage extends ImageView {
         super(context);
         this.clickerState = clickerState;
         model = Model.getInstance();
+        scaleGestureDetector = new ScaleGestureDetector(context, new ScaleListener());
+        gestureDetector = new GestureDetector(context, new PanGestureListener());
     }
 
     int pageNumber;
@@ -79,6 +112,17 @@ public class PDFimage extends ImageView {
                         break;
                 }
             }
+        } else {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    panHold = true;
+                    break;
+                case MotionEvent.ACTION_UP:
+                    panHold = false;
+                    break;
+            }
+            scaleGestureDetector.onTouchEvent(event);
+            gestureDetector.onTouchEvent(event);
         }
             /*switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
