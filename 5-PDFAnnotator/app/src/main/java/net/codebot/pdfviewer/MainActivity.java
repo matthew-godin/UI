@@ -59,17 +59,17 @@ public class MainActivity extends AppCompatActivity {
             try {
                 openRenderer(this);
             } catch (Exception ex) {
-                Log.v("MY_APP", "Problem opening renderer: " + ex.toString());
+                Log.d(LOGNAME, "Problem opening renderer: " + ex.toString());
             }
             try {
                 showPage(currentPageNumber);
             } catch (Exception ex) {
-                Log.v("MY_APP", "Problem showing the page using the renderer: " + ex.toString());
+                Log.d(LOGNAME, "Problem showing the page using the renderer: " + ex.toString());
             }
         try {
             closeRenderer();
         } catch (Exception ex) {
-            Log.v("MY_APP", "Problem closing renderer: " + ex.toString());
+            Log.d(LOGNAME, "Problem closing renderer: " + ex.toString());
         }
         model.setNumPages(currentPageCount);
         pageImage.setPageIndex(currentPageNumber);

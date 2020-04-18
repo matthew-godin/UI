@@ -69,17 +69,14 @@ class Model
         if (actionIndex > -1) {
             return savedActions.get(actionIndex--);
         } else {
-            Log.v("MY_APP", "UNDO NULL");
             return null;
         }
     }
 
     public PossibleAction redo() {
-        Log.v("MY_APP", "FGFG " + actionIndex + ";" + savedActions.size());
         if (actionIndex < savedActions.size() - 1) {
             return savedActions.get(++actionIndex);
         } else {
-            Log.v("MY_APP", "REDO NULL");
             return null;
         }
     }

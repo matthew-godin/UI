@@ -144,13 +144,12 @@ public class PDFimage extends ImageView {
 
     private void checkErase(float x, float y) {
         boolean done = false;
-        double drawWidth = DRAW_WIDTH * 4.0, highlightWidth = HIGHLIGHT_WIDTH * 4.0;
+        double drawWidth = DRAW_WIDTH * 4.0, highlightWidth = HIGHLIGHT_WIDTH;
         for (int i = 0; !done && i < points.size(); ++i) {
             for (int j = 0; !done && j < points.get(i).size() - 1; ++j) {
                 double distance = lineDistance(new Point((int)x, (int)y), points.get(i).get(j), points.get(i).get(j + 1));
                 Paint paint = paints.get(i);
                 if (paint.getColor() == Color.BLUE) {
-                    Log.v("MY_APP", distance + ";" + drawWidth);
                     if (distance <= drawWidth) {
                         model.pushAction(new PossibleAction(i, paths.get(i),
                                 paints.get(i), points.get(i), clickerState, pageNumber));
@@ -159,8 +158,7 @@ public class PDFimage extends ImageView {
                         paints.remove(i);
                         done = true;
                     }
-                } else if (paint.getColor() == Color.YELLOW) {
-                    Log.v("MY_APP", distance + ";" + drawWidth);
+                } else {
                     if (distance <= highlightWidth) {
                         model.pushAction(new PossibleAction(i, paths.get(i),
                                 paints.get(i), points.get(i), clickerState, pageNumber));
