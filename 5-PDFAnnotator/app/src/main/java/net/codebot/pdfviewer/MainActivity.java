@@ -2,11 +2,15 @@ package net.codebot.pdfviewer;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.pdf.PdfRenderer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.RequiresApi;
@@ -29,6 +33,9 @@ public class MainActivity extends AppCompatActivity {
     final String LOGNAME = "pdf_viewer";
     final String FILENAME = "shannon1948.pdf";
     final int FILERESID = R.raw.shannon1948;
+    enum ClickerState {NORMAL, DRAW, HIGHLIGHT, ERASE};
+    ClickerState clickerState;
+    Model model;
 
     // manage the pages of the PDF, see below
     PdfRenderer pdfRenderer;
@@ -37,37 +44,145 @@ public class MainActivity extends AppCompatActivity {
 
     // custom ImageView class that captures strokes and draws them over the image
     PDFimage pageImage;
+    int currentPageNumber, currentPageCount;
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void openPdf() {
+            pdfRenderer = null;
+            LinearLayout layout = findViewById(R.id.pdfLayout);
+            pageImage = new PDFimage(this, clickerState);
+            layout.removeAllViews();
+            layout.addView(pageImage);
+            layout.setEnabled(true);
+            pageImage.setMinimumWidth(1000);
+            pageImage.setMinimumHeight(1850);
+            try {
+                openRenderer(this);
+            } catch (Exception ex) {
+                Log.v("MY_APP", "Problem opening renderer: " + ex.toString());
+            }
+            try {
+                showPage(currentPageNumber);
+            } catch (Exception ex) {
+                Log.v("MY_APP", "Problem showing the page using the renderer: " + ex.toString());
+            }
+        try {
+            closeRenderer();
+        } catch (Exception ex) {
+            Log.v("MY_APP", "Problem closing renderer: " + ex.toString());
+        }
+        model.setNumPages(currentPageCount);
+        pageImage.setPageIndex(currentPageNumber);
+    }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        clickerState = ClickerState.NORMAL;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         //getSupportActionBar().setTitle(FILENAME);
+        currentPageNumber = 0;
+        model = Model.getInstance();
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         TextView documentTitle = findViewById(R.id.documentTitle);
         documentTitle.setText(FILENAME);
-        TextView pageNumber = findViewById(R.id.pageNumber);
-        pageNumber.setText("Page " + "1" + "/" + "5");
-
-        LinearLayout layout = findViewById(R.id.pdfLayout);
-        pageImage = new PDFimage(this);
-        layout.addView(pageImage);
-        layout.setEnabled(true);
-        pageImage.setMinimumWidth(1000);
-        pageImage.setMinimumHeight(1850);
 
         // open page 0 of the PDF
         // it will be displayed as an image in the pageImage (above)
-        try {
-            openRenderer(this);
-            showPage(0);
-            closeRenderer();
-        } catch (IOException exception) {
-            Log.d(LOGNAME, "Error opening PDF");
-        }
+        openPdf();
+        final TextView pageNumber = findViewById(R.id.pageNumber);
+        pageNumber.setText("Page " + Integer.toString(currentPageNumber + 1) + "/" + Integer.toString(currentPageCount));
+        ((ImageButton)findViewById(R.id.up)).setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v) {
+                if (currentPageNumber > 0) {
+                    --currentPageNumber;
+                    openPdf();
+                    TextView pageNumber = findViewById(R.id.pageNumber);
+                    pageNumber.setText("Page " + Integer.toString(currentPageNumber + 1) + "/" + Integer.toString(currentPageCount));
+                }
+            }
+        });
+        ((ImageButton)findViewById(R.id.down)).setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v) {
+                    if (currentPageNumber < currentPageCount - 1) {
+                        ++currentPageNumber;
+                        openPdf();
+                        TextView pageNumber = findViewById(R.id.pageNumber);
+                        pageNumber.setText("Page " + Integer.toString(currentPageNumber + 1) + "/" + Integer.toString(currentPageCount));
+                    }
+            }
+        });
+        ((ImageButton)findViewById(R.id.draw)).setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v) {
+                clickerState = ClickerState.DRAW;
+                pageImage.setClickerState(clickerState);
+            }
+        });
+        ((ImageButton)findViewById(R.id.highlight)).setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v) {
+                clickerState = ClickerState.HIGHLIGHT;
+                pageImage.setClickerState(clickerState);
+            }
+        });
+        ((ImageButton)findViewById(R.id.erase)).setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v) {
+                clickerState = ClickerState.ERASE;
+                pageImage.setClickerState(clickerState);
+            }
+        });
+        ((ImageButton)findViewById(R.id.undoButton)).setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v) {
+                PossibleAction action = model.undo();
+                if (action != null) {
+                    if (action.pageNumber != currentPageNumber) {
+                        currentPageNumber = action.pageNumber;
+                        openPdf();
+                        TextView pageNumber = findViewById(R.id.pageNumber);
+                        pageNumber.setText("Page " + Integer.toString(currentPageNumber + 1) + "/" + Integer.toString(currentPageCount));
+                    }
+                    pageImage.unperformAction(action);
+                }
+            }
+        });
+        ((ImageButton)findViewById(R.id.redoButton)).setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v) {
+                PossibleAction action = model.redo();
+                if (action != null) {
+                    if (action.pageNumber != currentPageNumber) {
+                        currentPageNumber = action.pageNumber;
+                        openPdf();
+                        TextView pageNumber = findViewById(R.id.pageNumber);
+                        pageNumber.setText("Page " + Integer.toString(currentPageNumber + 1) + "/" + Integer.toString(currentPageCount));
+                    }
+                    pageImage.performAction(action);
+                }
+            }
+        });
+        ((Toolbar)findViewById(R.id.toolbar)).setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v) {
+                clickerState = ClickerState.NORMAL;
+                pageImage.setClickerState(clickerState);
+            }
+        });
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -112,6 +227,7 @@ public class MainActivity extends AppCompatActivity {
     private void closeRenderer() throws IOException {
         if (null != currentPage) {
             currentPage.close();
+            currentPage = null;
         }
         pdfRenderer.close();
         parcelFileDescriptor.close();
@@ -119,12 +235,14 @@ public class MainActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void showPage(int index) {
-        if (pdfRenderer.getPageCount() <= index) {
+        currentPageCount = pdfRenderer.getPageCount();
+        if (currentPageCount <= index) {
             return;
         }
         // Close the current page before opening another one.
         if (null != currentPage) {
             currentPage.close();
+            currentPage = null;
         }
         // Use `openPage` to open a specific page in PDF.
         currentPage = pdfRenderer.openPage(index);
